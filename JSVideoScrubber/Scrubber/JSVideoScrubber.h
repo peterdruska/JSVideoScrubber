@@ -12,10 +12,14 @@
 
 @property (assign, nonatomic) CMTime duration;
 @property (assign, nonatomic) CGFloat offset;
+@property (assign, nonatomic) CGFloat pauseMarkerLocation;
 
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;
 - (void) reset;
+
 -(void)animateMarker:(id)sender;
+// timeInterval is the value of marker, where we pause played video
+-(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval;
 
 @end

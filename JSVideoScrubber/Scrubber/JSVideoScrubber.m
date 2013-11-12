@@ -12,14 +12,15 @@
 #import "UIImage+JSScrubber.h"
 #import "JSRenderOperation.h"
 #import "JSVideoScrubber.h"
+#import "Constants.h"
 
 #define js_marker_center (self.slider.size.width / 2)
 #define js_marker_w (self.slider.size.width)
-#define js_marker_start 0
+#define js_marker_start (self.frame.origin.x)
 #define js_marker_stop (self.frame.size.width - (js_marker_w))
 #define js_marker_y_offset (self.frame.size.height - (kJSFrameInset))
 
-#define kJSAnimateIn 0.25f
+#define kJSAnimateIn 0.15f
 #define kJSTrackingYFudgeFactor 24.0f
 
 @interface JSVideoScrubber ()
@@ -40,7 +41,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset;
+@synthesize offset = _offset, pauseMarkerLocation;
 
 #pragma mark - Initialization
 
@@ -73,7 +74,7 @@
     [self.renderQueue setSuspended:NO];
     
     self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
-    self.slider = [[UIImage imageNamed:@"slider"] resizableImageWithCapInsets:UIEdgeInsetsMake(2.0f, 26.0f, 2.0f, 26.0f)];
+    self.slider = [[UIImage imageNamed:@"slider"] resizableImageWithCapInsets:UIEdgeInsetsMake(2.0f, 6.0f, 2.0f, 6.0f)];
 
     self.markerLocation = js_marker_start;
     self.blockOffsetUpdates = NO;
@@ -171,7 +172,9 @@
     } else {
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
-    
+	
+	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
+
     _offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
 }
@@ -191,7 +194,7 @@
     
     CGFloat x = (offset / CMTimeGetSeconds(self.duration)) * (self.frame.size.width - js_marker_w);
     [self updateMarkerToPoint:CGPointMake(x + js_marker_start, 0.0f)];
-    
+	
     _offset = offset;
 }
 
@@ -337,7 +340,28 @@
 }
 
 -(void)animateMarker:(id)sender{
-	NSLog(@"animate");
+	NSTimeInterval durationTimeInterval = (double)self.duration.value / (double)self.duration.timescale;
+	CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
+	[animation setDuration:durationTimeInterval];
+	[animation setRepeatCount:0];
+	[animation setFromValue:0];
+	[animation setToValue:[NSNumber numberWithFloat:js_marker_stop]];
+	animation.autoreverses = NO;
+	animation.delegate = self;
+	[self.markerLayer addAnimation:animation forKey:@"animation"];
+}
+
+-(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
+	NSTimeInterval durationTimeInterval = (double)self.duration.value / (double)self.duration.timescale;
+	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+	if ( pauseMarkerLocation >= selfWidth ) {
+		pauseMarkerLocation = 0;
+	}
+//	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", (selfWidth / durationTimeInterval) * timeInterval, selfWidth, durationTimeInterval, timeInterval );
+	[self.markerLayer removeAllAnimations];
+	self.markerLocation = pauseMarkerLocation;
+	_offset = [self offsetForMarkerLocation];
+    [self setNeedsDisplay];
 }
 
 @end
