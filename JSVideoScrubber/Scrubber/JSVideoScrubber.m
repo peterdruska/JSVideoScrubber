@@ -15,7 +15,7 @@
 
 #define js_marker_center (self.slider.size.width / 2)
 #define js_marker_w (self.slider.size.width)
-#define js_marker_start (self.frame.origin.x)
+#define js_marker_start 0
 #define js_marker_stop (self.frame.size.width - (js_marker_w))
 #define js_marker_y_offset (self.frame.size.height - (kJSFrameInset))
 
@@ -334,6 +334,10 @@
     
     [self.layer addSublayer:self.markerLayer];
     [self.layer insertSublayer:self.stripLayer below:self.markerLayer];
+}
+
+-(void)animateMarker:(id)sender{
+	NSLog(@"animate");
 }
 
 @end

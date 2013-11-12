@@ -16,5 +16,6 @@
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;
 - (void) reset;
+-(void)animateMarker:(id)sender;
 
 @end
