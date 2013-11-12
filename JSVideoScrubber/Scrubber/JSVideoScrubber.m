@@ -173,7 +173,7 @@
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
 	
-	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
+//	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
 
     _offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
@@ -355,11 +355,10 @@
 	NSTimeInterval durationTimeInterval = (double)self.duration.value / (double)self.duration.timescale;
 	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
 	if ( pauseMarkerLocation >= selfWidth ) {
-		pauseMarkerLocation = 0;
+		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
 	}
-//	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", (selfWidth / durationTimeInterval) * timeInterval, selfWidth, durationTimeInterval, timeInterval );
+	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", pauseMarkerLocation, selfWidth, durationTimeInterval, timeInterval );
 	[self.markerLayer removeAllAnimations];
-	self.markerLocation = pauseMarkerLocation;
 	_offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
 }
