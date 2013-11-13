@@ -126,7 +126,7 @@
     
     [self updateMarkerToPoint:l];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
-    
+	
     return YES;
 }
 
@@ -144,6 +144,7 @@
     [self updateMarkerToPoint:p];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
+	
     return YES;
 }
 
@@ -224,7 +225,7 @@
         }
         completion:^(BOOL finished) {
             self.asset = nil;
-            self.duration = CMTimeMakeWithSeconds(0.0, 1);
+            self.duration = CMTimeMakeWithSeconds(0.0, NSEC_PER_SEC);
             self.offset = 0.0f;
          
             self.markerLocation = js_marker_start;

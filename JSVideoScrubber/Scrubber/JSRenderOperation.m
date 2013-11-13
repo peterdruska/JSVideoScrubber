@@ -95,7 +95,7 @@
     CMTime actualTime;
     NSError *error = nil;
     
-    CGImageRef image = [self.generator copyCGImageAtTime:CMTimeMakeWithSeconds(0.0, 1) actualTime:&actualTime error:&error];
+    CGImageRef image = [self.generator copyCGImageAtTime:CMTimeMakeWithSeconds(0.0, NSEC_PER_SEC) actualTime:&actualTime error:&error];
     
     if (self.isCancelled) {
         return;
@@ -184,7 +184,7 @@
             continue;
         }
         
-        CMTime t = CMTimeMakeWithSeconds(offset, 100000);
+        CMTime t = CMTimeMakeWithSeconds(offset, NSEC_PER_SEC);
         CGImageRef source = [self.generator copyCGImageAtTime:t actualTime:&actualTime error:error];
         
         if (!source) {
