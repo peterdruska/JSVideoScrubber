@@ -357,7 +357,7 @@
 	if ( pauseMarkerLocation >= selfWidth ) {
 		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
 	}
-	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", pauseMarkerLocation, selfWidth, durationTimeInterval, timeInterval );
+//	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", pauseMarkerLocation, selfWidth, durationTimeInterval, timeInterval );
 	[self.markerLayer removeAllAnimations];
 	_offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
