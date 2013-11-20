@@ -16,7 +16,7 @@
 
 #define js_marker_center (self.slider.size.width / 2)
 #define js_marker_w (self.slider.size.width)
-#define js_marker_start (self.frame.origin.x)
+#define js_marker_start 0
 #define js_marker_stop (self.frame.size.width - (js_marker_w))
 #define js_marker_y_offset (self.frame.size.height - (kJSFrameInset))
 
@@ -41,7 +41,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset, pauseMarkerLocation;
+@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation;
 
 #pragma mark - Initialization
 
@@ -126,7 +126,7 @@
     
     [self updateMarkerToPoint:l];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
-	
+    
     return YES;
 }
 
@@ -144,7 +144,6 @@
     [self updateMarkerToPoint:p];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
-	
     return YES;
 }
 
@@ -225,7 +224,7 @@
         }
         completion:^(BOOL finished) {
             self.asset = nil;
-            self.duration = CMTimeMakeWithSeconds(0.0, NSEC_PER_SEC);
+            self.duration = CMTimeMakeWithSeconds(0.0, 1);
             self.offset = 0.0f;
          
             self.markerLocation = js_marker_start;
@@ -340,26 +339,38 @@
     [self.layer insertSublayer:self.stripLayer below:self.markerLayer];
 }
 
--(void)animateMarker:(id)sender{
-	NSTimeInterval durationTimeInterval = (double)self.duration.value / (double)self.duration.timescale;
+-(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval{
+	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
 	CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
 	[animation setDuration:durationTimeInterval];
 	[animation setRepeatCount:0];
-	[animation setFromValue:0];
+	[animation setFromValue:[NSNumber numberWithFloat:timeInterval]];
 	[animation setToValue:[NSNumber numberWithFloat:js_marker_stop]];
 	animation.autoreverses = NO;
 	animation.delegate = self;
 	[self.markerLayer addAnimation:animation forKey:@"animation"];
+	
+	playMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+	
+	self.markerLocation = playMarkerLocation;
+	if ( playMarkerLocation > selfWidth || playMarkerLocation < 0 ) {
+		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
+	}
+	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
+	_offset = [self offsetForMarkerLocation];
+    [self setNeedsDisplay];
 }
 
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
-	NSTimeInterval durationTimeInterval = (double)self.duration.value / (double)self.duration.timescale;
+	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
 	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
-	if ( pauseMarkerLocation >= selfWidth ) {
+	
+	self.markerLocation = pauseMarkerLocation;
+	if ( pauseMarkerLocation > selfWidth || pauseMarkerLocation < 0 ) {
 		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
 	}
-//	NSLog(@"value of next marker location %f = ( %f / %f ) * %f", pauseMarkerLocation, selfWidth, durationTimeInterval, timeInterval );
 	[self.markerLayer removeAllAnimations];
+	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
 	_offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
 }

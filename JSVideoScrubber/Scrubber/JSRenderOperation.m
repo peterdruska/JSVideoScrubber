@@ -95,7 +95,7 @@
     CMTime actualTime;
     NSError *error = nil;
     
-    CGImageRef image = [self.generator copyCGImageAtTime:CMTimeMakeWithSeconds(0.0, NSEC_PER_SEC) actualTime:&actualTime error:&error];
+    CGImageRef image = [self.generator copyCGImageAtTime:CMTimeMakeWithSeconds(0.0, 1) actualTime:&actualTime error:&error];
     
     if (self.isCancelled) {
         return;
@@ -184,7 +184,7 @@
             continue;
         }
         
-        CMTime t = CMTimeMakeWithSeconds(offset, NSEC_PER_SEC);
+        CMTime t = CMTimeMakeWithSeconds(offset, 100000);
         CGImageRef source = [self.generator copyCGImageAtTime:t actualTime:&actualTime error:error];
         
         if (!source) {
@@ -203,12 +203,13 @@
     CGRect stripFrame = CGRectMake(0.0f, 0.0f,frame.size.width, height);
     
     CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
+	CGBitmapInfo bitmapInfo = (CGBitmapInfo)kCGImageAlphaPremultipliedFirst;
     CGContextRef stripCtx = CGBitmapContextCreate(NULL, stripFrame.size.width,
                                                   stripFrame.size.height,
                                                   8,
                                                   (4 * stripFrame.size.width),
                                                   colorSpace,
-                                                  kCGImageAlphaPremultipliedFirst);
+                                                  bitmapInfo);
     
     CGContextTranslateCTM(stripCtx, 0, stripFrame.size.height);
     CGContextScaleCTM(stripCtx, 1.0, -1.0);
