@@ -23,7 +23,10 @@
 #define kJSAnimateIn 0.15f
 #define kJSTrackingYFudgeFactor 24.0f
 
-@interface JSVideoScrubber ()
+@interface JSVideoScrubber (){
+    BOOL markerTrackingIsStopped; // if user moves with marker in timeline, then NO, if user do not move with marker, then YES
+    CGPoint previousPoint; // previous point of tracking marker to seek if touch is moved in time
+}
 
 @property (strong, nonatomic) NSOperationQueue *renderQueue;
 @property (strong, nonatomic) AVAsset *asset;
@@ -41,7 +44,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation;
+@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation, moveMarkerLocation;
 
 #pragma mark - Initialization
 
@@ -78,6 +81,10 @@
 
     self.markerLocation = js_marker_start;
     self.blockOffsetUpdates = NO;
+    moveMarkerLocation = 0.;
+    playMarkerLocation = 0.;
+    pauseMarkerLocation = 0.;
+    markerTrackingIsStopped = YES;
     
     [self setupControlLayers];
     self.layer.opacity = 0.0f;
@@ -115,9 +122,13 @@
 
 - (BOOL) beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    
+    NSLog(@"zacinam tahat");
     self.blockOffsetUpdates = YES;
+    markerTrackingIsStopped = NO;
     
     CGPoint l = [touch locationInView:self];
+    previousPoint = l; // first previous point is the point where user starts to move with marker
     if ([self markerHitTest:l]) {
         self.touchOffset = l.x - self.markerLocation;
     } else {
@@ -132,7 +143,19 @@
 
 - (BOOL) continueTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    NSLog(@"taham stale");
+    
+    // if difference of marker points is less then 10 pixels in some time, zoom in - send notification to RFPreviewViewController
+    [[NSNotificationCenter defaultCenter]
+         postNotificationName:NOTIFICATION_ZOOM_IN
+         object:self];
+    
+    // measure time of changing of p.x values, if change is less than .5 second, set markerTrackingIsStopped=YES and then send notification to zoom in
+    
     CGPoint p = [touch locationInView:self];
+    previousPoint = p;
+    
+    NSLog(@"%f", p.x);
     
     CGRect trackingFrame = self.bounds;
     trackingFrame.size.height = trackingFrame.size.height + kJSTrackingYFudgeFactor;
@@ -159,8 +182,15 @@
 {
     self.blockOffsetUpdates = NO;
     self.touchOffset = 0.0f;
+    markerTrackingIsStopped = NO;
     
     [super endTrackingWithTouch:touch withEvent:event];
+    
+    NSLog(@"koniec tahania");
+    // with tracking end we send notification to RFPreviewViewController and we have to zoom out timeline
+    [[NSNotificationCenter defaultCenter]
+         postNotificationName:NOTIFICATION_ZOOM_OUT
+         object:self];
 }
 
 - (void) updateMarkerToPoint:(CGPoint) touchPoint
@@ -345,13 +375,14 @@
 	[animation setDuration:durationTimeInterval];
 	[animation setRepeatCount:0];
 	[animation setFromValue:[NSNumber numberWithFloat:timeInterval]];
-	[animation setToValue:[NSNumber numberWithFloat:js_marker_stop]];
+	[animation setToValue:[NSNumber numberWithFloat:js_marker_stop - js_marker_w]];
 	animation.autoreverses = NO;
 	animation.delegate = self;
 	[self.markerLayer addAnimation:animation forKey:@"animation"];
 	
 	playMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
 	
+    
 	self.markerLocation = playMarkerLocation;
 	if ( playMarkerLocation > selfWidth || playMarkerLocation < 0 ) {
 		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
@@ -364,6 +395,7 @@
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
 	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
 	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+    
 	
 	self.markerLocation = pauseMarkerLocation;
 	if ( pauseMarkerLocation > selfWidth || pauseMarkerLocation < 0 ) {
@@ -371,7 +403,20 @@
 	}
 	[self.markerLayer removeAllAnimations];
 	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
-	_offset = [self offsetForMarkerLocation];
+    [self setNeedsDisplay];
+}
+
+-(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval{
+    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
+	
+	moveMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+	
+    
+	self.markerLocation = moveMarkerLocation;
+	if ( moveMarkerLocation >= selfWidth || moveMarkerLocation < 0 ) {
+		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
+	}
+	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
     [self setNeedsDisplay];
 }
 
