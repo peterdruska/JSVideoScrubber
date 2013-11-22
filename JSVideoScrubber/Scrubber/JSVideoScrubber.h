@@ -15,13 +15,13 @@
 @property (assign, nonatomic) CGFloat pauseMarkerLocation;
 @property (assign, nonatomic) CGFloat playMarkerLocation;
 @property (assign, nonatomic) CGFloat moveMarkerLocation;
-@property (assign, nonatomic) NSTimer *timer;
+@property (strong, nonatomic) NSTimer *timer;
 
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;
 - (void) reset;
 
--(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval;
+//-(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval;
 // timeInterval is the value of marker, where we pause played video
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval;
 -(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval;
