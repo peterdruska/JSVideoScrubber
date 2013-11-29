@@ -139,7 +139,7 @@ static void addRoundedRectToPath(CGContextRef context, CGRect rect, float ovalWi
             int h = self.size.height;
             
             CGColorSpaceRef colorSpace = CGColorSpaceCreateDeviceRGB();
-            CGContextRef context = CGBitmapContextCreate(NULL, w, h, 8, 4 * w, colorSpace, kCGImageAlphaPremultipliedFirst);
+            CGContextRef context = CGBitmapContextCreate(NULL, w, h, 8, 4 * w, colorSpace, kCGBitmapAlphaInfoMask);
             
             CGContextBeginPath(context);
             CGRect rect = CGRectMake(0, 0, self.size.width, self.size.height);
