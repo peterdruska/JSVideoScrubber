@@ -440,7 +440,7 @@
         [timer invalidate];
         timer = nil;
     }
-    timer = [NSTimer scheduledTimerWithTimeInterval:1.
+    timer = [NSTimer scheduledTimerWithTimeInterval:TIME_TO_ZOOM_IN
                                                   target:self
                                                 selector:@selector(timer:)
                                                 userInfo:nil repeats:NO];
