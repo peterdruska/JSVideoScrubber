@@ -215,6 +215,8 @@
     } else {
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
+    
+    self.positionXOfMarker = touchPoint.x + 10.; // 10 is value of distance origin.x of jsScrubberView from its root view
 	
 //	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
 
@@ -322,6 +324,8 @@
         [UIView animateWithDuration:kJSAnimateIn animations:^{
             ref.layer.opacity = 1.0f;
         }];
+        
+        [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SHOW_RATING_VIEWS object:nil];
     };
 
     [self.renderQueue addOperation:op];

@@ -16,6 +16,7 @@
 @property (assign, nonatomic) CGFloat playMarkerLocation;
 @property (assign, nonatomic) CGFloat moveMarkerLocation;
 @property (strong, nonatomic) NSTimer *timer;
+@property (assign, nonatomic) CGFloat positionXOfMarker;
 
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;
