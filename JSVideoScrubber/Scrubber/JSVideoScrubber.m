@@ -177,6 +177,11 @@
     return YES;
 }
 
+//- (void) sendAction:(SEL)action to:(id)target forEvent:(UIEvent *)event
+//{
+//    NSLog(@"posun vo videu");
+//}
+
 - (void) cancelTrackingWithEvent:(UIEvent *)event
 {
     self.blockOffsetUpdates = NO;
@@ -216,7 +221,7 @@
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
     
-    self.positionXOfMarker = touchPoint.x + 10.; // 10 is value of distance origin.x of jsScrubberView from its root view
+    self.positionXOfMarker = touchPoint.x;
 	
 //	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
 
@@ -333,7 +338,7 @@
 
 - (CGFloat) offsetForMarkerLocation
 {
-    CGFloat ratio = (self.markerLocation / (self.frame.size.width - js_marker_w));
+    CGFloat ratio = (self.markerLocation / (selfWidth - js_marker_w));
     return (ratio * CMTimeGetSeconds(self.duration));
 }
 
@@ -411,7 +416,7 @@
 
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
 	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval - 10.;
     
 	
 	self.markerLocation = pauseMarkerLocation;
@@ -425,8 +430,8 @@
 
 -(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval{
     NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-	
-	moveMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
+    
+	moveMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval - 10.; // 10 is translation of marker after showing rating view
 	
     
 	self.markerLocation = moveMarkerLocation;

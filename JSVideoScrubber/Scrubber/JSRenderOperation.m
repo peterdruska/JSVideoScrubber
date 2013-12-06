@@ -9,6 +9,7 @@
 #import "JSAssetDefines.h"
 #import "UIImage+JSScrubber.h"
 #import "JSRenderOperation.h"
+#import "Constants.h"
 
 #define js_scaled_img_height (self.frame.size.height - (2 * kJStripOffset))
 
@@ -151,12 +152,12 @@
 {
     CGFloat intervals = (frame.size.width) / width;
     
-    double duration = CMTimeGetSeconds(asset.duration);
-    double offset = duration / intervals;
+    CGFloat duration = CMTimeGetSeconds(asset.duration);
+    CGFloat offset = duration / intervals;
     
     NSMutableArray *indexes = [NSMutableArray array];
     
-    double time = 0.0f;
+    CGFloat time = 0.0f;
     
     while (time < duration) {
         [indexes addObject:[NSNumber numberWithDouble:time]];
@@ -178,13 +179,13 @@
             return nil;
         }
         
-        double offset = [number doubleValue];
+        CGFloat offset = [number doubleValue];
         
         if (offset < 0 || offset > CMTimeGetSeconds(self.asset.duration)) {
             continue;
         }
         
-        CMTime t = CMTimeMakeWithSeconds(offset, 100000);
+        CMTime t = CMTimeMakeWithSeconds(offset, 600);
         CGImageRef source = [self.generator copyCGImageAtTime:t actualTime:&actualTime error:error];
         
         if (!source) {
