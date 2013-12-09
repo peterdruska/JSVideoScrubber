@@ -56,7 +56,7 @@
     if (self) {
         [self initScrubber];
     }
-
+    
     return self;
 }
 
@@ -79,7 +79,7 @@
     
     self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
     self.slider = [[UIImage imageNamed:@"slider"] resizableImageWithCapInsets:UIEdgeInsetsMake(2.0f, 6.0f, 2.0f, 6.0f)];
-
+    
     self.markerLocation = js_marker_start;
     self.blockOffsetUpdates = NO;
     moveMarkerLocation = 0.;
@@ -110,13 +110,13 @@
     }
     
     [UIView animateWithDuration:kJSAnimateIn
-        animations:^{
-            self.layer.opacity = 0.0f;
-        }
-        completion:^(BOOL finished) {
-            [self setupControlWithAVAsset:self.asset];
-            [self setNeedsDisplay];
-        }
+                     animations:^{
+                         self.layer.opacity = 0.0f;
+                     }
+                     completion:^(BOOL finished) {
+                         [self setupControlWithAVAsset:self.asset];
+                         [self setNeedsDisplay];
+                     }
      ];
 }
 
@@ -125,7 +125,7 @@
 - (BOOL) beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
     
-//    NSLog(@"zacinam tahat");
+    //    NSLog(@"zacinam tahat");
     self.blockOffsetUpdates = YES;
     
     CGPoint l = [touch locationInView:self];
@@ -149,7 +149,7 @@
 
 - (BOOL) continueTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
-//    NSLog(@"taham stale");
+    //    NSLog(@"taham stale");
     
     
     CGPoint p = [touch locationInView:self];
@@ -192,7 +192,7 @@
     
     [super endTrackingWithTouch:touch withEvent:event];
     
-//    NSLog(@"koniec tahania");
+    //    NSLog(@"koniec tahania");
     
     [self stopMeassureTime];
     
@@ -200,8 +200,8 @@
     // only if video is zoomed
     if ( zoomed ) {
         [[NSNotificationCenter defaultCenter]
-             postNotificationName:NOTIFICATION_ZOOM_OUT
-             object:self];
+         postNotificationName:NOTIFICATION_ZOOM_OUT
+         object:self];
         zoomed = NO;
     }
 }
@@ -218,8 +218,8 @@
     
     self.positionXOfMarker = self.markerLocation;
 	
-//	NSLog(@"marker location %f (marker offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation]);
-
+    //	NSLog(@"marker location %f (marker offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation]);
+    
     _offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
 }
@@ -264,16 +264,16 @@
     [self.renderQueue cancelAllOperations];
     
     [UIView animateWithDuration:0.25f
-        animations:^{
-            self.layer.opacity = 0.0f;
-        }
-        completion:^(BOOL finished) {
-            self.asset = nil;
-            self.duration = CMTimeMakeWithSeconds(0.0, 1);
-            self.offset = 0.0f;
-         
-            self.markerLocation = js_marker_start;
-     }];
+                     animations:^{
+                         self.layer.opacity = 0.0f;
+                     }
+                     completion:^(BOOL finished) {
+                         self.asset = nil;
+                         self.duration = CMTimeMakeWithSeconds(0.0, 1);
+                         self.offset = 0.0f;
+                         
+                         self.markerLocation = js_marker_start;
+                     }];
 }
 
 #pragma mark - Internal
@@ -283,13 +283,13 @@
     [self.renderQueue cancelAllOperations];
     
     JSRenderOperation *op = nil;
-
+    
     if (indexes) {
         op = [[JSRenderOperation alloc] initWithAsset:asset indexAt:indexes targetFrame:self.frame];
     } else {
         op = [[JSRenderOperation alloc] initWithAsset:asset targetFrame:self.frame];
     }
-
+    
     __weak JSVideoScrubber *ref = self;
     
     op.renderCompletionBlock = ^(UIImage *strip, NSError *error) {
@@ -327,7 +327,7 @@
         
         [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SHOW_RATING_VIEWS object:nil];
     };
-
+    
     [self.renderQueue addOperation:op];
 }
 
@@ -341,7 +341,7 @@
 {
     CGFloat ratio = self.offset / CMTimeGetSeconds(self.duration);
     CGFloat location = ratio * (js_marker_stop - js_marker_start);
-
+    
     if (location < js_marker_start) {
         return js_marker_start;
     }
@@ -358,11 +358,11 @@
     if (point.x < self.markerLocation || point.x > (self.markerLocation + self.slider.size.width)) { //x test
         return NO;
     }
-
+    
     if (point.y < kJSMarkerInset || point.y > (kJSMarkerInset + self.slider.size.height)) { //y test
         return NO;
     }
-
+    
     return YES;
 }
 
@@ -370,7 +370,7 @@
 {
     self.stripLayer = [CALayer layer];
     self.markerLayer = [CALayer layer];
-
+    
     self.stripLayer.bounds = self.bounds;
     self.markerLayer.bounds = CGRectMake(0, 0, self.slider.size.width, self.bounds.size.height - (2 * kJSMarkerInset));
     
@@ -396,10 +396,10 @@
 //	animation.autoreverses = NO;
 //	animation.delegate = self;
 //	[self.markerLayer addAnimation:animation forKey:@"animation"];
-//	
+//
 //	playMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
-//	
-//    
+//
+//
 //	self.markerLocation = playMarkerLocation;
 //	if ( playMarkerLocation > selfWidth || playMarkerLocation < 0 ) {
 //		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
@@ -445,9 +445,9 @@
         timer = nil;
     }
     timer = [NSTimer scheduledTimerWithTimeInterval:TIME_TO_ZOOM_IN
-                                                  target:self
-                                                selector:@selector(timer:)
-                                                userInfo:nil repeats:NO];
+                                             target:self
+                                           selector:@selector(timer:)
+                                           userInfo:nil repeats:NO];
 }
 
 -(void)stopMeassureTime{
@@ -461,8 +461,8 @@
     // ==
     // if timer reaches time of .5 second
     [[NSNotificationCenter defaultCenter]
-         postNotificationName:NOTIFICATION_ZOOM_IN
-         object:self];
+     postNotificationName:NOTIFICATION_ZOOM_IN
+     object:self];
     zoomed = YES;
     [self stopMeassureTime];
 }
