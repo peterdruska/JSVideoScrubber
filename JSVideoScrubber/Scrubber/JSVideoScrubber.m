@@ -208,6 +208,8 @@
 
 - (void) updateMarkerToPoint:(CGPoint) touchPoint
 {
+    [self setNeedsDisplay];
+//    NSLog(@"touch point %f", touchPoint.x);
     if ((touchPoint.x - self.touchOffset) < js_marker_start) {
         self.markerLocation = js_marker_start;
     } else if (touchPoint.x - self.touchOffset > js_marker_stop) {
@@ -217,6 +219,7 @@
     }
     
     self.positionXOfMarker = self.markerLocation;
+//    NSLog(@"updateMarkerToPoint %f", self.positionXOfMarker);
 	
     //	NSLog(@"marker location %f (marker offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation]);
     
@@ -423,10 +426,11 @@
     [self setNeedsDisplay];
 }
 
--(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval{
-    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
+-(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset{
+//    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration); // duration of exported movie
+    NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration);
 	
-	moveMarkerLocation = timeInterval / (durationTimeInterval / selfWidth);
+	moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
 	self.markerLocation = moveMarkerLocation;
     
 	if ( moveMarkerLocation >= selfWidth || moveMarkerLocation < 0 ) {
@@ -434,6 +438,7 @@
 	}
     
 	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
+    
     [self setNeedsDisplay];
 }
 

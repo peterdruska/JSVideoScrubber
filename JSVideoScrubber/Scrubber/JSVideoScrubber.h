@@ -25,6 +25,6 @@
 //-(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval;
 // timeInterval is the value of marker, where we pause played video
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval;
--(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval;
+-(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset;
 
 @end
