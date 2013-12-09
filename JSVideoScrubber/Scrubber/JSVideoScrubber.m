@@ -177,11 +177,6 @@
     return YES;
 }
 
-//- (void) sendAction:(SEL)action to:(id)target forEvent:(UIEvent *)event
-//{
-//    NSLog(@"posun vo videu");
-//}
-
 - (void) cancelTrackingWithEvent:(UIEvent *)event
 {
     self.blockOffsetUpdates = NO;
@@ -221,9 +216,9 @@
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
     
-    self.positionXOfMarker = touchPoint.x;
+    self.positionXOfMarker = self.markerLocation;
 	
-//	NSLog(@"marker location %f (touch offset %f)", self.markerLocation, self.touchOffset);
+//	NSLog(@"marker location %f (marker offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation]);
 
     _offset = [self offsetForMarkerLocation];
     [self setNeedsDisplay];
@@ -416,7 +411,7 @@
 
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
 	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-	pauseMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval - 10.;
+	pauseMarkerLocation = timeInterval / (durationTimeInterval / selfWidth);
     
 	
 	self.markerLocation = pauseMarkerLocation;
@@ -430,14 +425,14 @@
 
 -(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval{
     NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-    
-	moveMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval - 10.; // 10 is translation of marker after showing rating view
 	
-    
+	moveMarkerLocation = timeInterval / (durationTimeInterval / selfWidth);
 	self.markerLocation = moveMarkerLocation;
+    
 	if ( moveMarkerLocation >= selfWidth || moveMarkerLocation < 0 ) {
 		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
 	}
+    
 	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
     [self setNeedsDisplay];
 }
