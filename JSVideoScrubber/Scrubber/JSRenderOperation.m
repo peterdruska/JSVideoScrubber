@@ -185,7 +185,7 @@
             continue;
         }
         
-        CMTime t = CMTimeMakeWithSeconds(offset, 600);
+        CMTime t = CMTimeMakeWithSeconds(offset, RF_NSEC_PER_SEC);
         CGImageRef source = [self.generator copyCGImageAtTime:t actualTime:&actualTime error:error];
         
         if (!source) {
