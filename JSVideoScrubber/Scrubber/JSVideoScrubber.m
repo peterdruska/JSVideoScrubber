@@ -140,7 +140,6 @@
         self.touchOffset = js_marker_center;
     }
     
-    NSLog(@" B %f", l.x);
     [self updateMarkerToPoint:l];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
@@ -172,7 +171,6 @@
 //        return NO;
 //    }
     
-    NSLog(@" c %f (%f)", p.x, p_old.x);
     [self updateMarkerToPoint:p];
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
@@ -210,7 +208,6 @@
 
 - (void) updateMarkerToPoint:(CGPoint) touchPoint
 {
-    NSLog(@"x  %f", touchPoint.x);
     if ((touchPoint.x - self.touchOffset) < js_marker_start) {
         self.markerLocation = js_marker_start;
     } else if (touchPoint.x - self.touchOffset > js_marker_stop) {
