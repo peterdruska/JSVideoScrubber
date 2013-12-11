@@ -45,7 +45,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation, moveMarkerLocation;
+@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation, moveMarkerLocation, markerView;
 
 #pragma mark - Initialization
 
@@ -141,7 +141,11 @@
     }
     
     [self updateMarkerToPoint:l];
+    
     [self sendActionsForControlEvents:UIControlEventValueChanged];
+    
+    
+    
     
     return YES;
 }
@@ -172,6 +176,9 @@
 //    }
     
     [self updateMarkerToPoint:p];
+
+    
+    
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
     return YES;
@@ -223,8 +230,11 @@
 	
 //    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
     
+    markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
+    markerView.alpha = 1.;
+    
     _offset = [self offsetForMarkerLocation];
-    [self setNeedsDisplay];
+//    [self setNeedsDisplay];
 }
 
 #pragma mark - Interface
@@ -386,8 +396,19 @@
     self.stripLayer.actions = d;
     self.markerLayer.actions = d;
     
+    self.markerLayer.hidden = YES; // if user continues tracking marker, app doesn't need it to show
+    
+    // prepare marker view
+    markerView = [[UIView alloc] initWithFrame:CGRectMake(0, -2., 8., self.frame.size.height+4.)];
+    markerView.backgroundColor = [UIColor whiteColor];
+    markerView.alpha = 0.;
+    [self bringSubviewToFront:markerView];
+    [self addSubview:markerView];
+    
     [self.layer addSublayer:self.markerLayer];
+    [self.layer addSublayer:self.markerView.layer];
     [self.layer insertSublayer:self.stripLayer below:self.markerLayer];
+    [self.layer insertSublayer:self.markerLayer below:markerView.layer];
 }
 
 //-(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval{
@@ -431,10 +452,24 @@
 //    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration); // duration of exported movie
     NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration); // duration of full length source movie
     
+    
     moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
     self.markerLocation = moveMarkerLocation;
     
-	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
+    markerView.alpha = 0.;
+    [markerView removeFromSuperview];
+    
+	[self updateMarkerToPoint:CGPointMake(moveMarkerLocation, 0.)];
+}
+
+-(void)animateMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset{
+    NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration); // duration of full length source movie
+    
+    moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
+    self.markerLocation = moveMarkerLocation;
+    
+    markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
+    markerView.alpha = 1.;
 }
 
 #pragma mark - Timer of changing marker position

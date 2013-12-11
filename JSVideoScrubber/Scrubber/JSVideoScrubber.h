@@ -17,6 +17,7 @@
 @property (assign, nonatomic) CGFloat moveMarkerLocation;
 @property (strong, nonatomic) NSTimer *timer;
 @property (assign, nonatomic) CGFloat positionXOfMarker;
+@property (strong, nonatomic) UIView *markerView;
 
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;
@@ -26,5 +27,6 @@
 // timeInterval is the value of marker, where we pause played video
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval;
 -(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset;
+-(void)animateMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset;
 
 @end
