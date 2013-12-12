@@ -229,12 +229,12 @@
 //    NSLog(@"updateMarkerToPoint %f", self.positionXOfMarker);
 	
 //    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
-    
+
     markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
     
     _offset = [self offsetForMarkerLocation];
-//    [self setNeedsDisplay];
+    [self setNeedsDisplay];
 }
 
 #pragma mark - Interface
@@ -411,29 +411,6 @@
     [self.layer insertSublayer:self.markerLayer below:markerView.layer];
 }
 
-//-(void)animateMarker:(id)sender withPlayTimeInterval:(NSTimeInterval)timeInterval{
-//	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-//	CABasicAnimation *animation = [CABasicAnimation animationWithKeyPath:@"transform.translation.x"];
-//	[animation setDuration:durationTimeInterval];
-//	[animation setRepeatCount:0];
-//	[animation setFromValue:[NSNumber numberWithFloat:timeInterval]];
-//	[animation setToValue:[NSNumber numberWithFloat:js_marker_stop - js_marker_w]];
-//	animation.autoreverses = NO;
-//	animation.delegate = self;
-//	[self.markerLayer addAnimation:animation forKey:@"animation"];
-//
-//	playMarkerLocation = (selfWidth / durationTimeInterval) * timeInterval;
-//
-//
-//	self.markerLocation = playMarkerLocation;
-//	if ( playMarkerLocation > selfWidth || playMarkerLocation < 0 ) {
-//		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
-//	}
-//	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
-//	_offset = [self offsetForMarkerLocation];
-//    [self setNeedsDisplay];
-//}
-
 -(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
 	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
 	pauseMarkerLocation = timeInterval / (durationTimeInterval / selfWidth);
@@ -455,9 +432,6 @@
     
     moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
     self.markerLocation = moveMarkerLocation;
-    
-    markerView.alpha = 0.;
-    [markerView removeFromSuperview];
     
 	[self updateMarkerToPoint:CGPointMake(moveMarkerLocation, 0.)];
 }
