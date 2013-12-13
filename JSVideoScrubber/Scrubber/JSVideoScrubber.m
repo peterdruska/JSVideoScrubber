@@ -77,7 +77,7 @@
     self.renderQueue.maxConcurrentOperationCount = 1;
     [self.renderQueue setSuspended:NO];
     
-    self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
+//    self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
     self.slider = [[UIImage imageNamed:@"slider"] resizableImageWithCapInsets:UIEdgeInsetsMake(2.0f, 6.0f, 2.0f, 6.0f)];
     
     self.markerLocation = js_marker_start;
