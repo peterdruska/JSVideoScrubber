@@ -144,7 +144,7 @@
     
     [self sendActionsForControlEvents:UIControlEventValueChanged];
     
-    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_HIDE_PLAY_BUTTON object:nil];
     
     
     return YES;
@@ -211,6 +211,8 @@
              object:self];
         zoomed = NO;
     }
+    
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SHOW_PLAY_BUTTON object:nil];
 }
 
 - (void) updateMarkerToPoint:(CGPoint) touchPoint
