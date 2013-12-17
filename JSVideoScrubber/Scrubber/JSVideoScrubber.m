@@ -444,6 +444,9 @@
     moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
     self.markerLocation = moveMarkerLocation;
     
+    if ( isnan(moveMarkerLocation) ) {
+        moveMarkerLocation = 0.0;
+    }
     markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
 }
