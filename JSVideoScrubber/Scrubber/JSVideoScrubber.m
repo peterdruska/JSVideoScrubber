@@ -232,7 +232,7 @@
 	
 //    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
 
-    markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
+    markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1. ) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
     
     _offset = [self offsetForMarkerLocation];
@@ -401,7 +401,7 @@
     self.markerLayer.hidden = YES; // if user continues tracking marker, app doesn't need it to show
     
     // prepare marker view
-    markerView = [[UIView alloc] initWithFrame:CGRectMake(0, -2., 8., self.frame.size.height+4.)];
+    markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
     markerView.backgroundColor = [UIColor whiteColor];
     markerView.alpha = 0.;
     [self bringSubviewToFront:markerView];
@@ -447,7 +447,7 @@
     if ( isnan(moveMarkerLocation) ) {
         moveMarkerLocation = 0.0;
     }
-    markerView.frame = CGRectMake(moveMarkerLocation, markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
+    markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1.) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
 }
 
