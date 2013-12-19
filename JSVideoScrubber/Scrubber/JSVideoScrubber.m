@@ -14,10 +14,10 @@
 #import "JSVideoScrubber.h"
 #import "Constants.h"
 
-#define js_marker_center (self.slider.size.width / 2)
+#define js_marker_center (self.slider.size.width / 2.)
 #define js_marker_w (self.slider.size.width)
 #define js_marker_start 0
-#define js_marker_stop (self.frame.size.width - (js_marker_w))
+#define js_marker_stop (self.frame.size.width - (js_marker_w / 2.))
 #define js_marker_y_offset (self.frame.size.height - (kJSFrameInset))
 
 #define kJSAnimateIn 0.15f
@@ -162,7 +162,7 @@
     differenceOfTwoPointsInTime = abs(p.x - p_old.x);
     
     // if finger moves more than 5 pixels, then stop timer
-    if ( differenceOfTwoPointsInTime >= .5 ) {
+    if ( differenceOfTwoPointsInTime >= .1 ) {
         [self stopMeassureTime];
     }
     
@@ -334,7 +334,7 @@
         ref.markerLayer.contents = (__bridge id)ref.slider.CGImage;
         ref.markerLocation = [ref markerLocationForCurrentOffset];
         
-        [ref setNeedsDisplay];
+//        [ref setNeedsDisplay];
         
         [UIView animateWithDuration:kJSAnimateIn animations:^{
             ref.layer.opacity = 1.0f;
@@ -404,8 +404,8 @@
     markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
     markerView.backgroundColor = [UIColor whiteColor];
     markerView.alpha = 0.;
-    [self bringSubviewToFront:markerView];
-    [self addSubview:markerView];
+//    [self bringSubviewToFront:markerView];
+//    [self addSubview:markerView];
     
     [self.layer addSublayer:self.markerLayer];
     [self.layer addSublayer:self.markerView.layer];
@@ -475,8 +475,8 @@
     // ==
     // if timer reaches time of .5 second
     [[NSNotificationCenter defaultCenter]
-     postNotificationName:NOTIFICATION_ZOOM_IN
-     object:self];
+         postNotificationName:NOTIFICATION_ZOOM_IN
+         object:self];
     zoomed = YES;
     [self stopMeassureTime];
 }
