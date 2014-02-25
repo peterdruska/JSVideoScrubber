@@ -18,6 +18,7 @@
 @property (strong, nonatomic) NSTimer *timer;
 @property (assign, nonatomic) CGFloat positionXOfMarker;
 @property (strong, nonatomic) UIView *markerView;
+@property (assign, nonatomic) BOOL allowZoomIn;
 
 - (void) setupControlWithAVAsset:(AVAsset *) asset;
 - (void) setupControlWithAVAsset:(AVAsset *) asset indexedAt:(NSArray *) requestedTimes;

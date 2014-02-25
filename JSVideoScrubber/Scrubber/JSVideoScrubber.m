@@ -24,6 +24,7 @@
 #define kJSTrackingYFudgeFactor 24.0f
 
 @interface JSVideoScrubber (){
+    BOOL _allowZoomIn;
     BOOL zoomed; // if video si beeing zoomed
     CGPoint previousPoint; // previous point of tracking marker to seek if touch is moved in time
     CGFloat differenceOfTwoPointsInTime; // difference of x value of two touch points in time (in timeline)
@@ -87,6 +88,7 @@
     pauseMarkerLocation = 0.;
     differenceOfTwoPointsInTime = 0.;
     zoomed = NO;
+    _allowZoomIn = YES;
     
     [self setupControlLayers];
     self.layer.opacity = 0.0f;
@@ -132,7 +134,9 @@
     
     // meassure time if user do not move finger on timeline
     [self stopMeassureTime]; // stop timer before we start it again
-    [self meassureTime];
+    if (_allowZoomIn) {
+        [self meassureTime];
+    }
     
     if ([self markerHitTest:l]) {
         self.touchOffset = l.x - self.markerLocation;
@@ -474,11 +478,23 @@
     // if difference of marker points is less then 5 pixels in some time, zoom in - send notification to RFPreviewViewController
     // ==
     // if timer reaches time of .5 second
-    [[NSNotificationCenter defaultCenter]
-         postNotificationName:NOTIFICATION_ZOOM_IN
-         object:self];
-    zoomed = YES;
+    if (_allowZoomIn) {
+        [[NSNotificationCenter defaultCenter]
+             postNotificationName:NOTIFICATION_ZOOM_IN
+             object:self];
+        zoomed = YES;
+    }
     [self stopMeassureTime];
+}
+
+#pragma mark - Zoom in
+
+-(void)setAllowZoomIn:(BOOL)allowZoomIn {
+    _allowZoomIn = allowZoomIn;
+    if (!_allowZoomIn) {
+        [self stopMeassureTime];
+        zoomed = NO;
+    }
 }
 
 @end
