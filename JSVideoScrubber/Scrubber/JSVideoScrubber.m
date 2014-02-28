@@ -78,7 +78,7 @@
     self.renderQueue.maxConcurrentOperationCount = 1;
     [self.renderQueue setSuspended:NO];
     
-//    self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
+    //    self.scrubberFrame = [[UIImage imageNamed:@"border"] resizableImageWithCapInsets:UIEdgeInsetsMake(kJSFrameInset, 0.0f, kJSFrameInset, 0.0f)];
     self.slider = [[UIImage imageNamed:@"slider"] resizableImageWithCapInsets:UIEdgeInsetsMake(2.0f, 6.0f, 2.0f, 6.0f)];
     
     self.markerLocation = js_marker_start;
@@ -146,8 +146,6 @@
     
     [self updateMarkerToPoint:l];
     
-    [self sendActionsForControlEvents:UIControlEventValueChanged];
-    
     [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_HIDE_PLAY_BUTTON object:nil];
     
     
@@ -172,18 +170,18 @@
     
     
     
-//    CGRect trackingFrame = self.bounds;
-//    trackingFrame.size.height = trackingFrame.size.height + kJSTrackingYFudgeFactor;
-//    
-//    if (!CGRectContainsPoint(trackingFrame, p)) {
-//        return NO;
-//    }
+    //    CGRect trackingFrame = self.bounds;
+    //    trackingFrame.size.height = trackingFrame.size.height + kJSTrackingYFudgeFactor;
+    //
+    //    if (!CGRectContainsPoint(trackingFrame, p)) {
+    //        return NO;
+    //    }
     
     [self updateMarkerToPoint:p];
-
     
     
-    [self sendActionsForControlEvents:UIControlEventValueChanged];
+    
+    
     
     return YES;
 }
@@ -203,7 +201,7 @@
     
     [super endTrackingWithTouch:touch withEvent:event];
     
-//    NSLog(@"koniec tahania");
+    //    NSLog(@"koniec tahania");
     
     [self stopMeassureTime];
     
@@ -211,8 +209,8 @@
     // only if video is zoomed
     if ( zoomed ) {
         [[NSNotificationCenter defaultCenter]
-             postNotificationName:NOTIFICATION_ZOOM_OUT
-             object:self];
+         postNotificationName:NOTIFICATION_ZOOM_OUT
+         object:self];
         zoomed = NO;
     }
     
@@ -229,17 +227,18 @@
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
     
-//    NSLog(@"%f", self.markerLocation);
+    //    NSLog(@"%f", self.markerLocation);
     
     self.positionXOfMarker = self.markerLocation;
-//    NSLog(@"updateMarkerToPoint %f", self.positionXOfMarker);
+    //    NSLog(@"updateMarkerToPoint %f", self.positionXOfMarker);
 	
-//    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
-
+    //    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
+    
     markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1. ) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
     
     _offset = [self offsetForMarkerLocation];
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
     [self setNeedsDisplay];
 }
 
@@ -338,7 +337,7 @@
         ref.markerLayer.contents = (__bridge id)ref.slider.CGImage;
         ref.markerLocation = [ref markerLocationForCurrentOffset];
         
-//        [ref setNeedsDisplay];
+        //        [ref setNeedsDisplay];
         
         [UIView animateWithDuration:kJSAnimateIn animations:^{
             ref.layer.opacity = 1.0f;
@@ -353,7 +352,7 @@
 - (CGFloat) offsetForMarkerLocation
 {
     CGFloat ratio = (self.markerLocation / (selfWidth - js_marker_w));
-//    NSLog(@"%f * %f", ratio, CMTimeGetSeconds(self.duration));
+    //    NSLog(@"%f * %f", ratio, CMTimeGetSeconds(self.duration));
     return (ratio * CMTimeGetSeconds(self.duration));
 }
 
@@ -408,8 +407,8 @@
     markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
     markerView.backgroundColor = [UIColor whiteColor];
     markerView.alpha = 0.;
-//    [self bringSubviewToFront:markerView];
-//    [self addSubview:markerView];
+    //    [self bringSubviewToFront:markerView];
+    //    [self addSubview:markerView];
     
     [self.layer addSublayer:self.markerLayer];
     [self.layer addSublayer:self.markerView.layer];
@@ -432,7 +431,7 @@
 }
 
 -(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset{
-//    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration); // duration of exported movie
+    //    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration); // duration of exported movie
     NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration); // duration of full length source movie
     
     
@@ -453,6 +452,7 @@
     }
     markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1.) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
     markerView.alpha = 1.;
+    [self setOffset:[self offsetForMarkerLocation]];
 }
 
 #pragma mark - Timer of changing marker position
@@ -480,8 +480,8 @@
     // if timer reaches time of .5 second
     if (_allowZoomIn) {
         [[NSNotificationCenter defaultCenter]
-             postNotificationName:NOTIFICATION_ZOOM_IN
-             object:self];
+         postNotificationName:NOTIFICATION_ZOOM_IN
+         object:self];
         zoomed = YES;
     }
     [self stopMeassureTime];
