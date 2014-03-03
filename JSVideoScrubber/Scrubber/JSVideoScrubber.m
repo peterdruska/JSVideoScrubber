@@ -217,8 +217,6 @@
         return;
     }
     
-    FLOG();
-    
     CGFloat x = (offset / CMTimeGetSeconds(self.duration)) * (self.frame.size.width - js_marker_w);
     [self updateMarkerToPoint:CGPointMake(x + js_marker_start, 0.0f)];
 	
@@ -304,6 +302,7 @@
         [ref setNeedsDisplay];
         
         [UIView animateWithDuration:kJSAnimateIn animations:^{
+            ref.markerView.alpha = 1.0f;
             ref.layer.opacity = 1.0f;
         }];
         
@@ -374,7 +373,7 @@
     // prepare marker view
     markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
     markerView.backgroundColor = [UIColor whiteColor];
-    markerView.alpha = 1.;
+    markerView.alpha = 0.0f;
     markerView.hidden = NO;
     //    [self bringSubviewToFront:markerView];
     //    [self addSubview:markerView];
@@ -467,8 +466,14 @@
     _zoomedTimeRange = kCMTimeRangeZero;
     [self queueRenderOperationForAsset:self.asset indexedAt:nil];
     
-    self.offset = beforeZoomOffset;
-    [self sendActionsForControlEvents:UIControlEventValueChanged];
+    CGFloat x = (beforeZoomOffset / CMTimeGetSeconds(self.duration)) * (self.frame.size.width - js_marker_w);
+    [UIView animateWithDuration:0.3 animations:^{
+        self.markerView.frame = CGRectMake(x, self.markerView.frame.origin.y, self.markerView.frame.size.width, self.markerView.frame.size.height);
+        self.offset = beforeZoomOffset;
+    } completion:^(BOOL finished) {
+        self.offset = beforeZoomOffset;
+        [self sendActionsForControlEvents:UIControlEventValueChanged];
+    }];
     
 }
 
