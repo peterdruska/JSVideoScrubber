@@ -19,6 +19,7 @@
 #define js_marker_start 0
 #define js_marker_stop (self.frame.size.width - (js_marker_w / 2.))
 #define js_marker_y_offset (self.frame.size.height - (kJSFrameInset))
+#define js_zoomed_duration 0.8f
 
 #define kJSAnimateIn 0.15f
 #define kJSTrackingYFudgeFactor 24.0f
@@ -26,8 +27,7 @@
 @interface JSVideoScrubber (){
     BOOL _allowZoomIn;
     BOOL zoomed; // if video si beeing zoomed
-    CGPoint previousPoint; // previous point of tracking marker to seek if touch is moved in time
-    CGFloat differenceOfTwoPointsInTime; // difference of x value of two touch points in time (in timeline)
+    CGFloat beforeZoomOffset;
 }
 
 @property (strong, nonatomic) NSOperationQueue *renderQueue;
@@ -46,7 +46,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset, pauseMarkerLocation, timer, playMarkerLocation, moveMarkerLocation, markerView;
+@synthesize offset = _offset, timer, markerView;
 
 #pragma mark - Initialization
 
@@ -83,10 +83,6 @@
     
     self.markerLocation = js_marker_start;
     self.blockOffsetUpdates = NO;
-    moveMarkerLocation = 0.;
-    playMarkerLocation = 0.;
-    pauseMarkerLocation = 0.;
-    differenceOfTwoPointsInTime = 0.;
     zoomed = NO;
     _allowZoomIn = YES;
     
@@ -100,6 +96,7 @@
 {
     CGPoint offset = CGPointMake((rect.origin.x + self.markerLocation), rect.origin.y + kJSMarkerInset);
     self.markerLayer.position = offset;
+    self.markerView.frame = CGRectMake(offset.x, self.markerView.frame.origin.y, self.markerView.frame.size.width, self.markerView.frame.size.height);
     [self setNeedsDisplay];
 }
 
@@ -126,8 +123,8 @@
 
 - (BOOL) beginTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_HIDE_PLAY_BUTTON object:nil];
     
-    //    NSLog(@"zacinam tahat");
     self.blockOffsetUpdates = YES;
     
     CGPoint l = [touch locationInView:self];
@@ -145,43 +142,26 @@
     }
     
     [self updateMarkerToPoint:l];
-    
-    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_HIDE_PLAY_BUTTON object:nil];
-    
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
     
     return YES;
 }
 
 - (BOOL) continueTrackingWithTouch:(UITouch *)touch withEvent:(UIEvent *)event
 {
-    //    NSLog(@"taham stale");
-    
-    
     CGPoint p = [touch locationInView:self];
     CGPoint p_old = [touch previousLocationInView:self]; // previous touch point
     
     [self meassureTime]; // start timer with moving marker
-    differenceOfTwoPointsInTime = abs(p.x - p_old.x);
+    CGFloat differenceOfTwoPointsInTime = abs(p.x - p_old.x);
     
     // if finger moves more than 5 pixels, then stop timer
     if ( differenceOfTwoPointsInTime >= .1 ) {
         [self stopMeassureTime];
     }
     
-    
-    
-    //    CGRect trackingFrame = self.bounds;
-    //    trackingFrame.size.height = trackingFrame.size.height + kJSTrackingYFudgeFactor;
-    //
-    //    if (!CGRectContainsPoint(trackingFrame, p)) {
-    //        return NO;
-    //    }
-    
     [self updateMarkerToPoint:p];
-    
-    
-    
-    
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
     
     return YES;
 }
@@ -199,26 +179,19 @@
     self.blockOffsetUpdates = NO;
     self.touchOffset = 0.0f;
     
-    [super endTrackingWithTouch:touch withEvent:event];
-    
-    //    NSLog(@"koniec tahania");
-    
     [self stopMeassureTime];
-    
     // with tracking end we send notification to RFPreviewViewController and we have to zoom out timeline
     // only if video is zoomed
-    if ( zoomed ) {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:NOTIFICATION_ZOOM_OUT
-         object:self];
-        zoomed = NO;
-    }
+    if ( zoomed ) [self zoomOut];
     
     [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_SHOW_PLAY_BUTTON object:nil];
+    
+    [super endTrackingWithTouch:touch withEvent:event];
 }
 
 - (void) updateMarkerToPoint:(CGPoint) touchPoint
 {
+    FLOG();
     if ((touchPoint.x - self.touchOffset) < js_marker_start) {
         self.markerLocation = js_marker_start;
     } else if (touchPoint.x - self.touchOffset > js_marker_stop) {
@@ -227,18 +200,7 @@
         self.markerLocation = touchPoint.x - self.touchOffset;
     }
     
-    //    NSLog(@"%f", self.markerLocation);
-    
-    self.positionXOfMarker = self.markerLocation;
-    //    NSLog(@"updateMarkerToPoint %f", self.positionXOfMarker);
-	
-    //    NSLog(@"marker location %f (marker offset %f, touch offset %f)", self.positionXOfMarker, [self offsetForMarkerLocation], self.touchOffset);
-    
-    markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1. ) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
-    markerView.alpha = 1.;
-    
     _offset = [self offsetForMarkerLocation];
-    [self sendActionsForControlEvents:UIControlEventValueChanged];
     [self setNeedsDisplay];
 }
 
@@ -254,6 +216,8 @@
     if (self.blockOffsetUpdates) {
         return;
     }
+    
+    FLOG();
     
     CGFloat x = (offset / CMTimeGetSeconds(self.duration)) * (self.frame.size.width - js_marker_w);
     [self updateMarkerToPoint:CGPointMake(x + js_marker_start, 0.0f)];
@@ -335,9 +299,9 @@
         UIGraphicsEndImageContext();
         
         ref.markerLayer.contents = (__bridge id)ref.slider.CGImage;
-        ref.markerLocation = [ref markerLocationForCurrentOffset];
+        //ref.markerLocation = [ref markerLocationForCurrentOffset];
         
-        //        [ref setNeedsDisplay];
+        [ref setNeedsDisplay];
         
         [UIView animateWithDuration:kJSAnimateIn animations:^{
             ref.layer.opacity = 1.0f;
@@ -351,13 +315,18 @@
 
 - (CGFloat) offsetForMarkerLocation
 {
+    FLOG();
     CGFloat ratio = (self.markerLocation / (selfWidth - js_marker_w));
-    //    NSLog(@"%f * %f", ratio, CMTimeGetSeconds(self.duration));
-    return (ratio * CMTimeGetSeconds(self.duration));
+    if (zoomed) {
+        return ((ratio * CMTimeGetSeconds(self.duration)) + CMTimeGetSeconds(_zoomedTimeRange.start));
+    } else {
+        return (ratio * CMTimeGetSeconds(self.duration));
+    }
 }
 
 - (CGFloat) markerLocationForCurrentOffset
 {
+    FLOG();
     CGFloat ratio = self.offset / CMTimeGetSeconds(self.duration);
     CGFloat location = ratio * (js_marker_stop - js_marker_start);
     
@@ -391,22 +360,22 @@
     self.markerLayer = [CALayer layer];
     
     self.stripLayer.bounds = self.bounds;
-    self.markerLayer.bounds = CGRectMake(0, 0, self.slider.size.width, self.bounds.size.height - (2 * kJSMarkerInset));
+    self.markerLayer.bounds = CGRectMake(0, 0.0, self.slider.size.width, self.bounds.size.height - (2 * kJSMarkerInset) + 4.0);
     
     self.stripLayer.anchorPoint = CGPointZero;
-    self.markerLayer.anchorPoint = CGPointZero;
+    self.markerLayer.anchorPoint = CGPointMake(0.0, 0.0);
     
     //do not apply animations on these properties
     NSDictionary *d =  @{@"position":[NSNull null], @"bounds":[NSNull null], @"anchorPoint": [NSNull null]};
     self.stripLayer.actions = d;
     self.markerLayer.actions = d;
-    
     self.markerLayer.hidden = YES; // if user continues tracking marker, app doesn't need it to show
     
     // prepare marker view
     markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
     markerView.backgroundColor = [UIColor whiteColor];
-    markerView.alpha = 0.;
+    markerView.alpha = 1.;
+    markerView.hidden = NO;
     //    [self bringSubviewToFront:markerView];
     //    [self addSubview:markerView];
     
@@ -414,45 +383,6 @@
     [self.layer addSublayer:self.markerView.layer];
     [self.layer insertSublayer:self.stripLayer below:self.markerLayer];
     [self.layer insertSublayer:self.markerLayer below:markerView.layer];
-}
-
--(void)stopAnimateMarker:(id)sender withPauseTimeInterval:(NSTimeInterval)timeInterval{
-	NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration);
-	pauseMarkerLocation = timeInterval / (durationTimeInterval / selfWidth);
-    
-	
-	self.markerLocation = pauseMarkerLocation;
-	if ( pauseMarkerLocation > selfWidth || pauseMarkerLocation < 0 ) {
-		self.markerLocation = 0; // if we reach maximum of lenght of video, we have to set location of marker to 0
-	}
-	[self.markerLayer removeAllAnimations];
-	[self updateMarkerToPoint:CGPointMake(self.markerLocation, 0.)];
-    [self setNeedsDisplay];
-}
-
--(void)moveMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset{
-    //    NSTimeInterval durationTimeInterval = CMTimeGetSeconds(self.duration); // duration of exported movie
-    NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration); // duration of full length source movie
-    
-    
-    moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
-    self.markerLocation = moveMarkerLocation;
-    
-	[self updateMarkerToPoint:CGPointMake(moveMarkerLocation, 0.)];
-}
-
--(void)animateMarkerToTimeInterval:(NSTimeInterval)timeInterval sourceAsset:(AVAsset *)sourceAsset{
-    NSTimeInterval sourceDurationTimeInterval = CMTimeGetSeconds(sourceAsset.duration); // duration of full length source movie
-    
-    moveMarkerLocation = timeInterval / (sourceDurationTimeInterval / selfWidth);
-    self.markerLocation = moveMarkerLocation;
-    
-    if ( isnan(moveMarkerLocation) ) {
-        moveMarkerLocation = 0.0;
-    }
-    markerView.frame = CGRectMake(moveMarkerLocation - ( markerView.frame.size.width - 1.) / 2., markerView.frame.origin.y, markerView.frame.size.width, markerView.frame.size.height);
-    markerView.alpha = 1.;
-    [self setOffset:[self offsetForMarkerLocation]];
 }
 
 #pragma mark - Timer of changing marker position
@@ -479,10 +409,7 @@
     // ==
     // if timer reaches time of .5 second
     if (_allowZoomIn) {
-        [[NSNotificationCenter defaultCenter]
-         postNotificationName:NOTIFICATION_ZOOM_IN
-         object:self];
-        zoomed = YES;
+        [self zoomIn];
     }
     [self stopMeassureTime];
 }
@@ -493,8 +420,56 @@
     _allowZoomIn = allowZoomIn;
     if (!_allowZoomIn) {
         [self stopMeassureTime];
-        zoomed = NO;
     }
+}
+
+#pragma mark - Zoom actions
+
+-(void)zoomIn {
+    
+    zoomed = YES;
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_ZOOM_IN object:self];
+    
+    beforeZoomOffset = _offset;
+    CMTime currentTime = CMTimeMakeWithSeconds(_offset, RF_NSEC_PER_SEC);
+    CGFloat zoomed_timeRation = beforeZoomOffset / CMTimeGetSeconds(self.duration);
+    
+    CMTime startTime = CMTimeMakeWithSeconds(CMTimeGetSeconds(currentTime) - (js_zoomed_duration * zoomed_timeRation), RF_NSEC_PER_SEC);
+    
+    NSLog(@"current offset %f", beforeZoomOffset);
+    NSLog(@"current time %f", CMTimeGetSeconds(currentTime));
+    NSLog(@"zoomed_time_ratio %f", zoomed_timeRation);
+    NSLog(@"start time %f", CMTimeGetSeconds(startTime));
+    
+	CMTime durationTime = CMTimeMakeWithSeconds(js_zoomed_duration, RF_NSEC_PER_SEC);
+	_zoomedTimeRange = CMTimeRangeMake(startTime, durationTime);
+    _duration = durationTime;
+    
+    CGFloat startTimeSecs = CMTimeGetSeconds(startTime);
+    
+    // fill out screenshot array
+    NSMutableArray * requestedTimes = [NSMutableArray array];
+    for (int i=0; i<9; i++) {
+        [requestedTimes addObject:[NSNumber numberWithDouble:startTimeSecs + i*0.1]];
+    }
+    [self queueRenderOperationForAsset:self.asset indexedAt:requestedTimes];
+    
+    [self updateMarkerToPoint:CGPointMake(self.markerLocation + self.touchOffset, 0.0f)];
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
+}
+
+-(void)zoomOut {
+    
+    zoomed = NO;
+    [[NSNotificationCenter defaultCenter] postNotificationName:NOTIFICATION_ZOOM_OUT object:self];
+    
+    self.duration = self.asset.duration;
+    _zoomedTimeRange = kCMTimeRangeZero;
+    [self queueRenderOperationForAsset:self.asset indexedAt:nil];
+    
+    self.offset = beforeZoomOffset;
+    [self sendActionsForControlEvents:UIControlEventValueChanged];
+    
 }
 
 @end
