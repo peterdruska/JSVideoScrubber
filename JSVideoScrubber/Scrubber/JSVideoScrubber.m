@@ -46,7 +46,7 @@
 
 @implementation JSVideoScrubber
 
-@synthesize offset = _offset, timer, markerView;
+@synthesize offset = _offset, timer = _timer, markerView = _markerView;
 
 #pragma mark - Initialization
 
@@ -371,36 +371,31 @@
     self.markerLayer.hidden = YES; // if user continues tracking marker, app doesn't need it to show
     
     // prepare marker view
-    markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
-    markerView.backgroundColor = [UIColor whiteColor];
-    markerView.alpha = 0.0f;
-    markerView.hidden = NO;
-    //    [self bringSubviewToFront:markerView];
-    //    [self addSubview:markerView];
+    self.markerView = [[UIView alloc] initWithFrame:CGRectMake(0. - (5. - 1.) / 2., -2., 5., self.frame.size.height+4.)];
+    self.markerView.backgroundColor = [UIColor whiteColor];
+    self.markerView.alpha = 0.0f;
+    self.markerView.hidden = NO;
     
     [self.layer addSublayer:self.markerLayer];
     [self.layer addSublayer:self.markerView.layer];
     [self.layer insertSublayer:self.stripLayer below:self.markerLayer];
-    [self.layer insertSublayer:self.markerLayer below:markerView.layer];
+    [self.layer insertSublayer:self.markerLayer below:self.markerView.layer];
 }
 
 #pragma mark - Timer of changing marker position
 
 -(void)meassureTime{
-    if ( timer ) {
-        [timer invalidate];
-        timer = nil;
-    }
-    timer = [NSTimer scheduledTimerWithTimeInterval:TIME_TO_ZOOM_IN
-                                             target:self
-                                           selector:@selector(timer:)
-                                           userInfo:nil repeats:NO];
+    [self stopMeassureTime];
+    self.timer = [NSTimer scheduledTimerWithTimeInterval:TIME_TO_ZOOM_IN
+                                                  target:self
+                                                selector:@selector(timer:)
+                                                userInfo:nil repeats:NO];
 }
 
 -(void)stopMeassureTime{
     // reset timer
-    [timer invalidate];
-    timer = nil;
+    [self.timer invalidate];
+    self.timer = nil;
 }
 
 -(void)timer:(id)sender{
