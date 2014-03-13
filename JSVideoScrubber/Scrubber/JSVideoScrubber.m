@@ -315,7 +315,7 @@
 - (CGFloat) offsetForMarkerLocation
 {
     FLOG();
-    CGFloat ratio = (self.markerLocation / (selfWidth - js_marker_w));
+    CGFloat ratio = (self.markerLocation / (self.frame.size.width - js_marker_w));
     if (zoomed) {
         return ((ratio * CMTimeGetSeconds(self.duration)) + CMTimeGetSeconds(_zoomedTimeRange.start));
     } else {
