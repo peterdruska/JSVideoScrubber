@@ -67,6 +67,8 @@
 
         self.generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
         self.generator.appliesPreferredTrackTransform = YES;
+        self.generator.requestedTimeToleranceBefore = CMTimeMakeWithSeconds(0.2, 1);
+        self.generator.requestedTimeToleranceAfter = CMTimeMakeWithSeconds(0.2, 1);
     }
     
     return self;
@@ -84,6 +86,8 @@
         
         self.generator = [AVAssetImageGenerator assetImageGeneratorWithAsset:asset];
         self.generator.appliesPreferredTrackTransform = YES;
+        self.generator.requestedTimeToleranceBefore = CMTimeMakeWithSeconds(0.2, 1);
+        self.generator.requestedTimeToleranceAfter = CMTimeMakeWithSeconds(0.2, 1);
     }
     
     return self;
@@ -93,6 +97,7 @@
 
 - (void) main
 {
+    
     CMTime actualTime;
     NSError *error = nil;
     
