@@ -153,7 +153,7 @@
     CGPoint p_old = [touch previousLocationInView:self]; // previous touch point
     
     [self meassureTime]; // start timer with moving marker
-    CGFloat differenceOfTwoPointsInTime = abs(p.x - p_old.x);
+    CGFloat differenceOfTwoPointsInTime = fabs(p.x - p_old.x);
     
     // if finger moves more than 5 pixels, then stop timer
     if ( differenceOfTwoPointsInTime >= .1 ) {
@@ -464,9 +464,9 @@
     CGFloat x = (beforeZoomOffset / CMTimeGetSeconds(self.duration)) * (self.frame.size.width - js_marker_w);
     [UIView animateWithDuration:0.3 animations:^{
         self.markerView.frame = CGRectMake(x, self.markerView.frame.origin.y, self.markerView.frame.size.width, self.markerView.frame.size.height);
-        self.offset = beforeZoomOffset;
+        self.offset = self->beforeZoomOffset;
     } completion:^(BOOL finished) {
-        self.offset = beforeZoomOffset;
+        self.offset = self->beforeZoomOffset;
         [self sendActionsForControlEvents:UIControlEventValueChanged];
     }];
     
